@@ -1,0 +1,45 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+SheetMatic2
+</name>
+</assembly>
+<members>
+<member name="M:SheetMatic2.ThisAddIn.#ctor(Microsoft.Office.Tools.Excel.ApplicationFactory,System.IServiceProvider)">
+</member><member name="M:SheetMatic2.ThisAddIn.Initialize">
+</member><member name="M:SheetMatic2.ThisAddIn.FinishInitialization">
+</member><member name="M:SheetMatic2.ThisAddIn.InitializeDataBindings">
+</member><member name="M:SheetMatic2.ThisAddIn.InitializeCachedData">
+</member><member name="M:SheetMatic2.ThisAddIn.InitializeData">
+</member><member name="M:SheetMatic2.ThisAddIn.BindToData">
+</member><member name="M:SheetMatic2.ThisAddIn.StartCaching(System.String)">
+</member><member name="M:SheetMatic2.ThisAddIn.StopCaching(System.String)">
+</member><member name="M:SheetMatic2.ThisAddIn.IsCached(System.String)">
+</member><member name="M:SheetMatic2.ThisAddIn.BeginInitialization">
+</member><member name="M:SheetMatic2.ThisAddIn.EndInitialization">
+</member><member name="M:SheetMatic2.ThisAddIn.InitializeControls">
+</member><member name="M:SheetMatic2.ThisAddIn.InitializeComponents">
+</member><member name="M:SheetMatic2.ThisAddIn.NeedsFill(System.String)">
+</member><member name="M:SheetMatic2.ThisAddIn.OnShutdown">
+</member><member name="T:SheetMatic2.ThisAddIn">
+</member><member name="M:SheetMatic2.Globals.#ctor">
+</member><member name="T:SheetMatic2.Globals">
+</member><member name="M:SheetMatic2.ThisRibbonCollection.#ctor(Microsoft.Office.Tools.Ribbon.RibbonFactory)">
+</member><member name="T:SheetMatic2.ThisRibbonCollection">
+</member><member name="P:SheetMatic2.My.Resources.Resources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:SheetMatic2.My.Resources.Resources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="T:SheetMatic2.My.Resources.Resources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+</members>
+</doc>
