@@ -14,11 +14,6 @@ Public Class VisualLanguageForm
         Dim startPoint As Point
         Dim endPoint As Point
     End Structure
-    Private Structure dataBlock
-        Dim block As Rectangle
-        Dim relationsIn As List(Of GraphicsPath)
-        Dim relationsOut As List(Of GraphicsPath)
-    End Structure
 
     Private StartPoint As Point
     Private endPoint As Point
@@ -30,7 +25,6 @@ Public Class VisualLanguageForm
     Private selectedRelationIndex As Integer
     Private selectedObject As Integer
 
-    Private Const dataBlockHeight As Integer = 76, dataBlockWidth As Integer = 114
 
     Private Sub DrawingPictureBox_MouseClick(sender As Object, e As MouseEventArgs) Handles DrawingPictureBox.MouseClick
         If e.Button = Windows.Forms.MouseButtons.Right AndAlso Control.MouseButtons = Windows.Forms.MouseButtons.None Then
@@ -49,9 +43,9 @@ Public Class VisualLanguageForm
             Me.StartPoint = e.Location
             Me.endPoint = e.Location
             If Me.mode = editMode.dataBlockMode Then
-                Dim dataBlock As dataBlock = Me.GetDataBlock(Me.StartPoint)
+                Dim dataBlock As UIDataBlock = New UIDataBlock(Me.StartPoint)
                 Me.modelObjects.Add(dataBlock)
-                Me.InvalidateDataBlock(dataBlock.block)
+                Me.DrawingPictureBox.Invalidate(dataBlock.blockBorder)
                 Me.DrawingPictureBox.Update()
             ElseIf Me.mode = editMode.selectMode Then
                 Me.selectedDataBlockIndex = Me.GetDataBlockIndexAtPoint(e.Location)
@@ -67,14 +61,14 @@ Public Class VisualLanguageForm
         If Control.MouseButtons = Windows.Forms.MouseButtons.Left Then
             If Me.mode = editMode.selectMode Then
                 If Me.selectedDataBlockIndex <> -1 Then
-                    If Me.modelObjects(Me.selectedDataBlockIndex).GetType Is GetType(dataBlock) Then
-                        Dim dataBlock As dataBlock = CType(Me.modelObjects(Me.selectedDataBlockIndex), dataBlock)
+                    If Me.modelObjects(Me.selectedDataBlockIndex).GetType Is GetType(UIDataBlock) Then
+                        Dim dataBlock As UIDataBlock = CType(Me.modelObjects(Me.selectedDataBlockIndex), UIDataBlock)
                         Dim location As Point = e.Location
-                        Me.InvalidateDataBlock(dataBlock.block)
-                        dataBlock.block.Offset(location.X - Me.StartPoint.X, location.Y - Me.StartPoint.Y)
+                        Me.DrawingPictureBox.Invalidate(dataBlock.blockBorder)
+                        dataBlock.DataBlockRectangle.Offset(location.X - Me.StartPoint.X, location.Y - Me.StartPoint.Y)
                         Me.modelObjects(Me.selectedDataBlockIndex) = dataBlock
                         Me.StartPoint = location
-                        Me.InvalidateDataBlock(dataBlock.block)
+                        Me.DrawingPictureBox.Invalidate(dataBlock.blockBorder)
                         Me.DrawingPictureBox.Update()
                     End If
                 End If
@@ -98,13 +92,13 @@ Public Class VisualLanguageForm
                     Me.startDataBlockIndex <> Me.endDataBlockIndex Then
                     ' Relation should start and end in a datablock. The end datablock should differ from the start
                     ' datablock
-                    Dim startBlock As dataBlock = CType(Me.modelObjects(startDataBlockIndex), dataBlock)
-                    Dim endBlock As dataBlock = CType(Me.modelObjects(endDataBlockIndex), dataBlock)
+                    Dim startBlock As UIDataBlock = CType(Me.modelObjects(startDataBlockIndex), UIDataBlock)
+                    Dim endBlock As UIDataBlock = CType(Me.modelObjects(endDataBlockIndex), UIDataBlock)
                     Me.DrawingPictureBox.Invalidate(relation.RelationBorder)
-                    relation.SetRelationPath(Me.GetRelationPoints(startBlock.block, endBlock.block).startPoint, Me.GetRelationPoints(startBlock.block, endBlock.block).endPoint)
+                    relation.SetRelationPath(Me.GetRelationPoints(startBlock.DataBlockRectangle, endBlock.DataBlockRectangle).startPoint, Me.GetRelationPoints(startBlock.DataBlockRectangle, endBlock.DataBlockRectangle).endPoint)
                     ' Add new relation to startBlock and endBlock
-                    If IsNothing(startBlock.relationsOut) Then startBlock.relationsOut = New List(Of GraphicsPath)
-                    If IsNothing(endBlock.relationsIn) Then endBlock.relationsIn = New List(Of GraphicsPath)
+                    ' If IsNothing(startBlock.relationsOut) Then startBlock.relationsOut = New List(Of GraphicsPath)
+                    ' If IsNothing(endBlock.relationsIn) Then endBlock.relationsIn = New List(Of GraphicsPath)
                     'startBlock.relationsOut.Add(relation)
                     'endBlock.relationsIn.Add(relation)
                     Me.modelObjects(startDataBlockIndex) = startBlock
@@ -129,10 +123,10 @@ Public Class VisualLanguageForm
         With e.Graphics
             'Draw existing objects
             For Each modelObject As Object In Me.modelObjects
-                If modelObject.GetType() Is GetType(dataBlock) Then
-                    Dim dataBlock As dataBlock = CType(modelObject, dataBlock)
-                    .FillRectangle(Brushes.White, dataBlock.block)
-                    .DrawRectangle(Pens.Black, dataBlock.block)
+                If modelObject.GetType() Is GetType(UIDataBlock) Then
+                    Dim dataBlock As UIDataBlock = CType(modelObject, UIDataBlock)
+                    .FillRectangle(Brushes.White, dataBlock.DataBlockRectangle)
+                    .DrawRectangle(Pens.Black, dataBlock.DataBlockRectangle)
                 ElseIf modelObject.GetType Is GetType(UIRelation) Then
                     relationPen.EndCap = LineCap.ArrowAnchor
                     relationPen.CustomEndCap = arrowCap
@@ -143,9 +137,9 @@ Public Class VisualLanguageForm
             'Draw current objects
             If Control.MouseButtons = Windows.Forms.MouseButtons.Left Then
                 If Me.mode = editMode.dataBlockMode Then
-                    Dim dataBlock As dataBlock = Me.GetDataBlock(Me.StartPoint)
-                    .FillRectangle(Brushes.White, dataBlock.block)
-                    .DrawRectangle(Pens.Black, dataBlock.block)
+                    Dim dataBlock As UIDataBlock = New UIDataBlock(Me.StartPoint)
+                    .FillRectangle(Brushes.White, dataBlock.DataBlockRectangle)
+                    .DrawRectangle(Pens.Black, dataBlock.DataBlockRectangle)
                 ElseIf Me.mode = editMode.relationMode AndAlso _
                     Me.startDataBlockIndex <> -1 Then
                     Dim relation As UIRelation = New UIRelation(Me.StartPoint, Me.endPoint)
@@ -154,26 +148,14 @@ Public Class VisualLanguageForm
             End If
         End With
     End Sub
-    Private Function GetDataBlock(ByVal startPoint As Point) As dataBlock
-        Dim block As Rectangle = New Rectangle(startPoint.X, startPoint.Y, dataBlockWidth, dataBlockHeight)
-        Dim dataBlock As dataBlock = New dataBlock
-        dataBlock.block = block
-        Return dataBlock
-    End Function
-
-    Private Sub InvalidateDataBlock(ByVal dataBlock As Rectangle)
-        dataBlock.Inflate(1, 1)
-        Me.DrawingPictureBox.Invalidate(dataBlock)
-    End Sub
-
 
     Private Function GetDataBlockIndexAtPoint(ByVal location As Point) As Integer
         Dim result As Integer = -1
 
         For index As Integer = Me.modelObjects.Count - 1 To 0 Step -1
-            If Me.modelObjects(index).GetType() Is GetType(dataBlock) Then
-                Dim dataBlock As dataBlock = CType(Me.modelObjects(index), dataBlock)
-                If dataBlock.block.Contains(location) Then
+            If Me.modelObjects(index).GetType() Is GetType(UIDataBlock) Then
+                Dim dataBlock As UIDataBlock = CType(Me.modelObjects(index), UIDataBlock)
+                If dataBlock.DataBlockRectangle.Contains(location) Then
                     result = index
                     Exit For
                 End If
@@ -199,21 +181,21 @@ Public Class VisualLanguageForm
 
 
     Private Sub DeleteToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DeleteToolStripMenuItem.Click
-        Dim index As Integer, box As New Rectangle, dataBlock As dataBlock
+        Dim index As Integer, box As New Rectangle, dataBlock As UIDataBlock
         If Me.selectedDataBlockIndex <> -1 Then
             index = Me.selectedDataBlockIndex
         ElseIf Me.selectedRelationIndex <> -1 Then
             index = Me.selectedRelationIndex
         End If
-        If Me.modelObjects(index).GetType Is GetType(dataBlock) Then
-            dataBlock = CType(Me.modelObjects(Me.selectedDataBlockIndex), dataBlock)
-            box = dataBlock.block
+        If Me.modelObjects(index).GetType Is GetType(UIDataBlock) Then
+            dataBlock = CType(Me.modelObjects(Me.selectedDataBlockIndex), UIDataBlock)
+            box = dataBlock.blockBorder
         ElseIf Me.modelObjects(index).GetType Is GetType(UIRelation) Then
             Dim relation As UIRelation = CType(Me.modelObjects(index), UIRelation)
             box = relation.RelationBorder
         End If
         Me.modelObjects.RemoveAt(index)
-        Me.InvalidateDataBlock(box)
+        Me.DrawingPictureBox.Invalidate(box)
         Me.DrawingPictureBox.Update()
     End Sub
 

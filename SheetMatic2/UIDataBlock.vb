@@ -2,11 +2,12 @@
 Imports System.Drawing.Drawing2D
 Public Class UIDataBlock
     Private blockRectangle As Rectangle
+    Private border As Rectangle
     Private incomingRelations As List(Of Integer)
     Private outgoingRelations As List(Of Integer)
     Public Sub New(ByVal location As Point)
         Const rectangleHeight As Integer = 76, rectangleWith As Integer = 114
-        blockRectangle = New Rectangle(location.X + CInt(0.5 * rectangleWith), location.Y + CInt(0.5 * rectangleHeight), rectangleWith, rectangleHeight)
+        blockRectangle = New Rectangle(location.X - CInt(0.5 * rectangleWith), location.Y - CInt(0.5 * rectangleHeight), rectangleWith, rectangleHeight)
     End Sub
     ReadOnly Property DataBlockRectangle As Rectangle
         Get
@@ -21,6 +22,14 @@ Public Class UIDataBlock
     ReadOnly Property RelationsOut As List(Of Integer)
         Get
             Return outgoingRelations
+        End Get
+    End Property
+    ReadOnly Property blockBorder As Rectangle
+        Get
+            Dim border As Rectangle
+            border = blockRectangle
+            border.Inflate(1, 1)
+            Return border
         End Get
     End Property
     Public Sub MoveRectangle(ByVal x As Integer, ByVal y As Integer)
