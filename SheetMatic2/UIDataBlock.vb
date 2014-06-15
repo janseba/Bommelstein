@@ -8,6 +8,8 @@ Public Class UIDataBlock
     Public Sub New(ByVal location As Point)
         Const rectangleHeight As Integer = 76, rectangleWith As Integer = 114
         blockRectangle = New Rectangle(location.X - CInt(0.5 * rectangleWith), location.Y - CInt(0.5 * rectangleHeight), rectangleWith, rectangleHeight)
+        incomingRelations = New List(Of Integer)
+        outgoingRelations = New List(Of Integer)
     End Sub
     ReadOnly Property DataBlockRectangle As Rectangle
         Get

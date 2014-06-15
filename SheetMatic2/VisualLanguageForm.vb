@@ -65,7 +65,7 @@ Public Class VisualLanguageForm
                         Dim dataBlock As UIDataBlock = CType(Me.modelObjects(Me.selectedDataBlockIndex), UIDataBlock)
                         Dim location As Point = e.Location
                         Me.DrawingPictureBox.Invalidate(dataBlock.blockBorder)
-                        dataBlock.DataBlockRectangle.Offset(location.X - Me.StartPoint.X, location.Y - Me.StartPoint.Y)
+                        dataBlock.MoveRectangle(location.X - Me.StartPoint.X, location.Y - Me.StartPoint.Y)
                         Me.modelObjects(Me.selectedDataBlockIndex) = dataBlock
                         Me.StartPoint = location
                         Me.DrawingPictureBox.Invalidate(dataBlock.blockBorder)
@@ -96,15 +96,16 @@ Public Class VisualLanguageForm
                     Dim endBlock As UIDataBlock = CType(Me.modelObjects(endDataBlockIndex), UIDataBlock)
                     Me.DrawingPictureBox.Invalidate(relation.RelationBorder)
                     relation.SetRelationPath(Me.GetRelationPoints(startBlock.DataBlockRectangle, endBlock.DataBlockRectangle).startPoint, Me.GetRelationPoints(startBlock.DataBlockRectangle, endBlock.DataBlockRectangle).endPoint)
-                    ' Add new relation to startBlock and endBlock
-                    ' If IsNothing(startBlock.relationsOut) Then startBlock.relationsOut = New List(Of GraphicsPath)
-                    ' If IsNothing(endBlock.relationsIn) Then endBlock.relationsIn = New List(Of GraphicsPath)
-                    'startBlock.relationsOut.Add(relation)
-                    'endBlock.relationsIn.Add(relation)
+                    ' Add references to start and end data block
+                    relation.StartDataBlockIndex = Me.startDataBlockIndex
+                    relation.EndDataBlockIndex = Me.endDataBlockIndex
                     Me.modelObjects(startDataBlockIndex) = startBlock
                     Me.modelObjects(endDataBlockIndex) = endBlock
                     ' Add new relation to modelObjects and draw it on the screen
                     Me.modelObjects.Add(relation)
+                    ' Add incoming and outgoing relations to dataBlock
+                    startBlock.AddRelationOut(Me.modelObjects.Count - 1)
+                    endBlock.AddRelationIn(Me.modelObjects.Count - 1)
                     Me.DrawingPictureBox.Invalidate(relation.RelationBorder)
                     Me.DrawingPictureBox.Update()
                 ElseIf Me.startDataBlockIndex <> -1 And (Me.endDataBlockIndex = -1 Or Me.startDataBlockIndex = Me.endDataBlockIndex) Then
