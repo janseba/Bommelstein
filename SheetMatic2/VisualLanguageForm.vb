@@ -68,6 +68,7 @@ Public Class VisualLanguageForm
                         dataBlock.MoveRectangle(location.X - Me.StartPoint.X, location.Y - Me.StartPoint.Y)
                         Me.modelObjects(Me.selectedDataBlockIndex) = dataBlock
                         Me.StartPoint = location
+                        ReconnectRelations(dataBlock)
                         Me.DrawingPictureBox.Invalidate(dataBlock.blockBorder)
                         Me.DrawingPictureBox.Update()
                     End If
@@ -254,5 +255,28 @@ Public Class VisualLanguageForm
                       * 180 / Math.PI
         Return angle
     End Function
-
+    Private Sub ReconnectRelations(ByVal dataBlock As UIDataBlock)
+        For Each rIndex As Integer In dataBlock.RelationsOut
+            Dim relation As UIRelation
+            relation = CType(modelObjects(rIndex), UIRelation)
+            Me.DrawingPictureBox.Invalidate(relation.RelationBorder)
+            Dim points As relationPoints
+            Dim endBlock As UIDataBlock = CType(modelObjects(relation.EndDataBlockIndex), UIDataBlock)
+            points = GetRelationPoints(dataBlock.DataBlockRectangle, endBlock.DataBlockRectangle)
+            relation.SetRelationPath(points.startPoint, points.endPoint)
+            Me.DrawingPictureBox.Invalidate(relation.RelationBorder)
+            modelObjects(rIndex) = relation
+        Next
+        For Each rIndex As Integer In dataBlock.RelationsIn
+            Dim relation As UIRelation
+            relation = CType(modelObjects(rIndex), UIRelation)
+            Me.DrawingPictureBox.Invalidate(relation.RelationBorder)
+            Dim points As relationPoints
+            Dim startBlock As UIDataBlock = CType(modelObjects(relation.StartDataBlockIndex), UIDataBlock)
+            points = GetRelationPoints(startBlock.DataBlockRectangle, dataBlock.DataBlockRectangle)
+            relation.SetRelationPath(points.startPoint, points.endPoint)
+            Me.DrawingPictureBox.Invalidate(relation.RelationBorder)
+            modelObjects(rIndex) = relation
+        Next
+    End Sub
 End Class
